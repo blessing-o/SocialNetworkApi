@@ -46,12 +46,13 @@ module.exports = {
         }
     },
 
-    
+
   async updateUser(req, res) {
     try {
       const updatedUser = await user.findOneAndUpdate(
         { _id: req.params.userId },
         { $set: req.body },
+        { runValidators: true, new: true }
       );
 
       if (!updatedUser) {
@@ -79,4 +80,46 @@ module.exports = {
       res.status(500).json(error);
     }
   },
-}
+
+  async addFriend(req,res){
+    try {
+      const friend = await user.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $addToSet: { ...req.body } },
+        { runValidators: true, new: true }
+      );
+
+      if (!friend){
+        return res.status(404).json({message:'No friend with this id!'});
+      }
+      res.json(friend);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json(error);
+    }
+  },
+
+  async removeFriend(req, res) {
+    try {
+      const friend = await user.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { friends: req.params.friendId}},
+        { runValidators: true, new: true }
+      );
+
+      if (!friend) {
+        return res.status(404).json({ message: 'No application with this id!' });
+      }
+
+      res.json(friend);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+};
+
+//figure the friend thing out
+/**
+ * { $pull: { friends: { ...req.body }} },
+ */
+
